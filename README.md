@@ -10,8 +10,9 @@ Immerse yourself in the spiritual essence of these mantras, presented in Bengali
 
 
 # Download Link
-Download from **[GitHub Page](emc.apk)**
-Download from **[Upload Apk](https://www.upload-apk.com/hQsBBel9nPb2q7p)**
+[+] Download from **[GitHub Page](emc.apk)**
+[+] Download from **[Upload Apk](https://www.upload-apk.com/hQsBBel9nPb2q7p)**
+
 # Screenshot
 ![Screenshot1](1.jpg)
 ![Screenshot2](2.jpg)
