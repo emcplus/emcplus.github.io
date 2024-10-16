@@ -16,3 +16,5 @@ Immerse yourself in the spiritual essence of these mantras, presented in Bengali
 # Screenshot
 ![Screenshot1](1.jpg)
 ![Screenshot2](2.jpg)
+# Play Tic tac toe multiple players 
+ **[Play Now free,No log in](game.html)**
