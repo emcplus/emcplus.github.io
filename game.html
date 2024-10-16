@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Multilayer Tic Tac Toe Game">
+    <title>Multilayer Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .game {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            margin: 20px auto;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            background-color: #fff;
+            cursor: pointer;
+            border: 2px solid #000;
+        }
+
+        .cell:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCz1d28JDnC8lCXbySSmU6FbmtZTQDKIa0",
+            authDomain: "gettictactoe.firebaseapp.com",
+            projectId: "gettictactoe",
+            storageBucket: "gettictactoe.appspot.com",
+            messagingSenderId: "274987820755",
+            appId: "1:274987820755:web:a802d141230a1bce2e1626",
+            measurementId: "G-5SFZPSQKX3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentPlayer = 'X';
+        let board = Array(3).fill(null).map(() => Array(3).fill(null));
+        let gameId = '';
+        const gameElement = document.getElementById('game');
+
+        window.onload = function() {
+            document.getElementById('joinGame').addEventListener('click', async () => {
+                gameId = document.getElementById('gameId').value;
+                const gameDoc = doc(db, 'games', gameId);
+                const gameSnapshot = await getDoc(gameDoc);
+
+                if (gameSnapshot.exists()) {
+                    board = gameSnapshot.data().board;
+                    currentPlayer = gameSnapshot.data().currentPlayer;
+                    createBoard();
+                    listenForChanges(gameId);
+                } else {
+                    alert('Game does not exist!');
+                }
+            });
+
+            document.getElementById('reset').addEventListener('click', async () => {
+                gameId = document.getElementById('gameId').value;
+                const gameDoc = doc(db, 'games', gameId);
+                await setDoc(gameDoc, { board: Array(3).fill(null).map(() => Array(3).fill(null)), currentPlayer: 'X' });
+                board = Array(3).fill(null).map(() => Array(3).fill(null));
+                currentPlayer = 'X';
+                createBoard();
+            });
+        };
+
+        function createBoard() {
+            gameElement.innerHTML = '';
+            board.forEach((row, rowIndex) => {
+                row.forEach((cell, colIndex) => {
+                    const cellElement = document.createElement('div');
+                    cellElement.classList.add('cell');
+                    cellElement.innerText = cell || '';
+                    cellElement.addEventListener('click', () => handleClick(rowIndex, colIndex));
+                    gameElement.appendChild(cellElement);
+                });
+            });
+        }
+
+        async function handleClick(row, col) {
+            if (board[row][col] || checkWinner()) return;
+
+            board[row][col] = currentPlayer;
+            await setDoc(doc(db, 'games', gameId), { board, currentPlayer: currentPlayer === 'X' ? 'O' : 'X' });
+            createBoard();
+            if (checkWinner()) {
+                alert(`${currentPlayer} wins!`);
+            }
+        }
+
+        function checkWinner() {
+            const winningCombination = [
+                [[0, 0], [0, 1], [0, 2]],
+                [[1, 0], [1, 1], [1, 2]],
+                [[2, 0], [2, 1], [2, 2]],
+                [[0, 0], [1, 0], [2, 0]],
+                [[0, 1], [1, 1], [2, 1]],
+                [[0, 2], [1, 2], [2, 2]],
+                [[0, 0], [1, 1], [2, 2]],
+                [[0, 2], [1, 1], [2, 0]],
+            ];
+
+            return winningCombination.some(combination => {
+                const [[a, b], [c, d], [e, f]] = combination;
+                return board[a][b] && board[a][b] === board[c][d] && board[a][b] === board[e][f];
+            });
+        }
+
+        function listenForChanges(gameId) {
+            const gameDoc = doc(db, 'games', gameId);
+            onSnapshot(gameDoc, (doc) => {
+                const data = doc.data();
+                if (data) {
+                    board = data.board;
+                    currentPlayer = data.currentPlayer;
+                    createBoard();
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Multilayer Tic Tac Toe</h1>
+        <div id="game" class="game"></div>
+        <button id="reset">Reset Game</button>
+        <button id="joinGame">Join Game</button>
+        <input type="text" id="gameId" placeholder="Enter Game ID" />
+    </div>
+</body>
+</html>
